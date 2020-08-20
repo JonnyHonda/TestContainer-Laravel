@@ -1,0 +1,56 @@
+version: '3'
+services:
+  app:
+    build:
+      context: ./
+      args:
+        debug: "true"
+    ports:
+      - "80:80"
+    volumes:
+      - ./app:/var/www/app
+      - ./config:/var/www/config
+      - ./routes:/var/www/routes
+      - ./database:/var/www/database
+      - ./resources:/var/www/resources
+      - ./composer.json:/var/www/composer.json
+      - ./composer.lock:/var/www/composer.lock
+      - ./phpstan.neon:/var/www/phpstan.neon
+      - ./webpack.mix.js:/var/www/webpack.mix.js
+      - ./.env:/var/www/.env
+      - ./tests:/var/www/tests
+    networks:
+      - "backend"
+    environment:
+      - DB_HOST=mysql
+      - DB_DATABASE=test
+      - DB_USERNAME=test
+      - DB_PASSWORD=test
+
+  mysql:
+    image: mysql:5.7.26
+    networks:
+      - "backend"
+    ports:
+      - "3306:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=test
+      - MYSQL_USER=test
+      - MYSQL_PASSWORD=test
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+
+  test-browser:
+    image: selenium/standalone-chrome-debug:3.141.59-gold
+    privileged: true
+    networks:
+      - "backend"
+    volumes:
+      - /dev/shm:/dev/shm
+
+networks:
+  backend:
+
+volumes:
+  dbdata:
